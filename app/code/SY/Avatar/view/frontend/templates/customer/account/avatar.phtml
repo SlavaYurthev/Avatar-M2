@@ -1,0 +1,24 @@
+<div class="block block-dashboard-info">
+	<div class="block-title"><strong><?php echo __('Avatar'); ?></strong></div>
+	<div class="block-content">
+		<div class="box box-information">
+			<strong class="box-title">
+				<span><?php echo __('Current'); ?></span>
+			</strong>
+			<div class="box-content">
+				<img src="<?php echo rtrim($this->getUrl($this->getAvatar()),'/'); ?>" width="150">
+			</div>
+		</div>
+		<div class="box box-newsletter">
+			<strong class="box-title">
+				<span><?php echo __('Upload'); ?></span>
+			</strong>
+			<div class="box-content">
+				<form action="<?php echo $this->getUrl('sy_avatar/manager/upload'); ?>" enctype="multipart/form-data" method="POST">
+					<div><input type="file" name="avatar" accept="image/*"></div>
+					<div style="margin-top:8px;"><button type="submit"><span><span><?php echo __('Send'); ?></span></span></button></div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
