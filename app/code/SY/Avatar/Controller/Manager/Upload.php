@@ -1,4 +1,9 @@
 <?php
+/**
+ * Profile Avatar
+ * 
+ * @author Slava Yurthev
+ */
 namespace SY\Avatar\Controller\Manager;
 use \Magento\Framework\App\Action\Context;
 use \Magento\Framework\View\Result\PageFactory;

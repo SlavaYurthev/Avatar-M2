@@ -1,4 +1,9 @@
 <?php
+/**
+ * Profile Avatar
+ * 
+ * @author Slava Yurthev
+ */
 namespace SY\Avatar\Setup;
 
 use Magento\Framework\Setup\UpgradeSchemaInterface;

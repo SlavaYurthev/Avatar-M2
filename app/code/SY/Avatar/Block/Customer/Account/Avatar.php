@@ -1,4 +1,9 @@
 <?php
+/**
+ * Profile Avatar
+ * 
+ * @author Slava Yurthev
+ */
 namespace SY\Avatar\Block\Customer\Account;
 use \Magento\Framework\View\Element\Template;
 use \Magento\Framework\View\Element\Template\Context;
