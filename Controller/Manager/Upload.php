@@ -8,8 +8,12 @@ namespace SY\Avatar\Controller\Manager;
 use \Magento\Framework\App\Action\Context;
 use \Magento\Framework\View\Result\PageFactory;
 use \SY\Avatar\Block\Customer\Account\Avatar;
+use \Magento\Framework\App\Filesystem\DirectoryList;
+use \Magento\Framework\Filesystem;
 class Upload extends \Magento\Framework\App\Action\Action {
 	protected $_resultPageFactory;
+	protected $allowedExtensions = ['png','jpeg','jpg','gif','svg'];
+	protected $fileId = 'avatar';
 	public function __construct(Context $context, PageFactory $resultPageFactory){
 		$this->_resultPageFactory = $resultPageFactory;
 		parent::__construct($context);
@@ -20,19 +24,29 @@ class Upload extends \Magento\Framework\App\Action\Action {
 		$block = $resultPage->getLayout()->createBlock('SY\Avatar\Block\Customer\Account\Avatar');
 		$customer = $block->getCustomer();
 		if($customerId = $customer->getId()){
-			// realy don't know how ;)
-			$base_dir = dirname(dirname(dirname(dirname(dirname(dirname(__DIR__))))));
+			$module_dir = dirname(dirname(__DIR__));
+			$avatars_dir = '/view/frontend/web/media/';
 			if($customer->getData('avatar')){
-				@unlink($base_dir.'/'.$block->getAvatar());
+				@unlink($module_dir.$avatars_dir.$customer->getData('avatar'));
 			}
 			// Because ORM must be re-indexed
 			$resource = $object_manager->create('Magento\Framework\App\ResourceConnection');
 			$table = $resource->getTableName('customer_entity');
 			$write = $resource->getConnection($resource::DEFAULT_CONNECTION);
-			$file_name = $customerId.'_'.basename($_FILES['avatar']['name']);
-			if (move_uploaded_file($_FILES['avatar']['tmp_name'], $base_dir.'/'.$block::IMG_DIR.$file_name)) {
-				$write->query("UPDATE `{$table}` SET `avatar`='{$file_name}' WHERE `entity_id`='{$customerId}'");
-			}
+			try {
+				$uploader = new \Magento\MediaStorage\Model\File\Uploader(
+						$this->fileId,
+						$object_manager->create('Magento\MediaStorage\Helper\File\Storage\Database'),
+						$object_manager->create('Magento\MediaStorage\Helper\File\Storage'),
+						$object_manager->create('Magento\MediaStorage\Model\File\Validator\NotProtectedExtension')
+					);
+				$uploader->setAllowCreateFolders(true);
+				$uploader->setAllowedExtensions($this->allowedExtensions);
+				if ($uploader->save($module_dir.$avatars_dir.$customerId)) {
+					$uploadedFileNameAndPath = $customerId.'/'.$uploader->getUploadedFileName();
+					$write->query("UPDATE `{$table}` SET `avatar`='{$uploadedFileNameAndPath}' WHERE `entity_id`='{$customerId}'");
+				}
+			} catch (Exception $e) {}
 		}
 		$this->_redirect('customer/account');
 	}

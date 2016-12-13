@@ -11,7 +11,6 @@ use \Magento\Customer\Model\Session;
 use \Magento\Customer\Model\Customer;
 class Avatar extends Template {
 	protected $session;
-	const IMG_DIR = 'pub/media/SY/avatar/';
 	public function __construct(
 			Context $context,
 			Session $session,
@@ -32,15 +31,18 @@ class Avatar extends Template {
 		return $this->customer;
 	}
 	public function getSession(){
+		var_dump(dirname(dirname(dirname(__DIR__))));
 		return $this->session;
 	}
 	public function getAvatar(){
 		$img = 'default.jpg';
 		if($this->getCustomer()->getData('avatar')){
-			if(file_exists(self::IMG_DIR.$this->getCustomer()->getData('avatar'))){
+			$module_dir = dirname(dirname(dirname(__DIR__)));
+			$avatars_dir = '/view/frontend/web/media/';
+			if(file_exists($module_dir.$avatars_dir.$this->getCustomer()->getData('avatar'))){
 				$img = $this->getCustomer()->getData('avatar');
 			}
 		}
-		return self::IMG_DIR.$img;
+		return $this->getViewFileUrl('SY_Avatar/media/'.$img);
 	}
 }
