@@ -35,14 +35,16 @@ class Avatar extends Template {
 		return $this->session;
 	}
 	public function getAvatar(){
-		$img = 'default.jpg';
+		$url = $this->getViewFileUrl('SY_Avatar/media/default.jpg');
 		if($this->getCustomer()->getData('avatar')){
-			$module_dir = dirname(dirname(dirname(__DIR__)));
-			$avatars_dir = '/view/frontend/web/media/';
-			if(file_exists($module_dir.$avatars_dir.$this->getCustomer()->getData('avatar'))){
-				$img = $this->getCustomer()->getData('avatar');
+			$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+			$fileSystem = $objectManager->get('\Magento\Framework\Filesystem');
+			$mediaDir = $fileSystem->getDirectoryRead(\Magento\Framework\App\Filesystem\DirectoryList::ROOT)->getAbsolutePath().'media/';
+			if(file_exists($mediaDir.'avatar/'.$this->getCustomer()->getData('avatar'))){
+				$storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
+				$url = $storeManager->getStore()->getBaseUrl().'media/avatar/'.$this->getCustomer()->getData('avatar');
 			}
 		}
-		return $this->getViewFileUrl('SY_Avatar/media/'.$img);
+		return $url;
 	}
 }

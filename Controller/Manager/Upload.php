@@ -24,10 +24,12 @@ class Upload extends \Magento\Framework\App\Action\Action {
 		$block = $resultPage->getLayout()->createBlock('SY\Avatar\Block\Customer\Account\Avatar');
 		$customer = $block->getCustomer();
 		if($customerId = $customer->getId()){
-			$module_dir = dirname(dirname(__DIR__));
-			$avatars_dir = '/view/frontend/web/media/';
+			$fileSystem = $object_manager->create('\Magento\Framework\Filesystem');
+			// custom mediar dir - because pub/static must be re-generated and do this after every avatar upload is not optimal solution
+			$mediaDir = $fileSystem->getDirectoryRead(\Magento\Framework\App\Filesystem\DirectoryList::ROOT)->getAbsolutePath().'media/';
 			if($customer->getData('avatar')){
-				@unlink($module_dir.$avatars_dir.$customer->getData('avatar'));
+				@unlink($mediaDir.'avatar/'.$customer->getData('avatar'));
+				@rmdir($mediaDir.'avatar/'.$customer->getId());
 			}
 			// Because ORM must be re-indexed
 			$resource = $object_manager->create('Magento\Framework\App\ResourceConnection');
@@ -42,11 +44,11 @@ class Upload extends \Magento\Framework\App\Action\Action {
 					);
 				$uploader->setAllowCreateFolders(true);
 				$uploader->setAllowedExtensions($this->allowedExtensions);
-				if ($uploader->save($module_dir.$avatars_dir.$customerId)) {
+				if ($uploader->save($mediaDir.'avatar/'.$customerId)) {
 					$uploadedFileNameAndPath = $customerId.'/'.$uploader->getUploadedFileName();
 					$write->query("UPDATE `{$table}` SET `avatar`='{$uploadedFileNameAndPath}' WHERE `entity_id`='{$customerId}'");
 				}
-			} catch (Exception $e) {}
+			} catch (\Exception $e) {}
 		}
 		$this->_redirect('customer/account');
 	}
